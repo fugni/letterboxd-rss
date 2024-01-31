@@ -1,17 +1,30 @@
-const letterboxdUser = "flungi";
-document.title += letterboxdUser;
+const input = document.getElementById("username");
 
-fetch("https://letterboxd.com/" + letterboxdUser + "/rss")
-    .then((response) => response.text())
-    .then((str) => new window.DOMParser().parseFromString(str, "text/xml"))
-    .then((data) => {
-        const items = data.querySelectorAll("item");
-        console.log(items);
+let letterboxdUser = "flungi";
+document.title = "Letterboxd User: " + letterboxdUser;
+input.value = letterboxdUser;
 
-        items.forEach((item) => {
-            let title = item.querySelector("title").innerHTML;
-            if (title.includes("(contains spoilers)")) {
-                title = title.substring(0, title.indexOf("(contains spoilers)") - 1);
+input.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        letterboxd();
+    }
+});
+
+function letterboxd() {
+    document.querySelector(".movies").innerHTML = "";
+    letterboxdUser = input.value;
+    document.title = "Letterboxd User: " + letterboxdUser;
+    fetch("https://letterboxd.com/" + letterboxdUser + "/rss")
+        .then((response) => response.text())
+        .then((str) => new window.DOMParser().parseFromString(str, "text/xml"))
+        .then((data) => {
+            const items = data.querySelectorAll("item");
+            console.log(items);
+
+            items.forEach((item) => {
+                let title = item.querySelector("title").innerHTML;
+                if (title.includes("(contains spoilers)")) {
+                    title = title.substring(0, title.indexOf("(contains spoilers)") - 1);
             }
             
             movieTitle = title.split(" - ")[0].substring(0, title.split(" - ")[0].length - 6)
@@ -35,3 +48,6 @@ fetch("https://letterboxd.com/" + letterboxdUser + "/rss")
         
         });
     })
+}
+
+letterboxd();
