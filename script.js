@@ -16,6 +16,7 @@ let i = 0;
 function letterboxd() {
     results.innerHTML = "";
     movies = [];
+    username = input.value;
 
     fetch("https://letterboxd.com/" + username + "/rss")
         .then((response) => response.text())
@@ -70,7 +71,7 @@ function letterboxd() {
             const randomMovieOld = items[randomness];
             
 
-            results.innerHTML += "<span>result from letterboxd rss:</span>";
+            results.innerHTML += "<span>random movie from " + username + "'s letterboxd rss:</span>";
 
             // console.log(items[Math.floor(Math.random() * movies.length)]);
             const oldResultDiv = document.createElement("code");
