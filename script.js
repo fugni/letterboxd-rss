@@ -1,4 +1,7 @@
+const results = document.querySelector(".results");
 const input = document.getElementById("username");
+input.value = "flungi";
+let username = input.value;
 
 input.addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
@@ -6,58 +9,100 @@ input.addEventListener("keypress", function(event) {
     }
 });
 
+let movies = [];
+
+let i = 0;
+
 function letterboxd() {
-    document.querySelector(".movies").innerHTML = "";
-    let letterboxdUser = input.value;
-    document.title = "letterboxd user: " + letterboxdUser;
-    fetch("https://letterboxd.com/" + letterboxdUser + "/rss")
+    results.innerHTML = "";
+    movies = [];
+
+    fetch("https://letterboxd.com/" + username + "/rss")
         .then((response) => response.text())
         .then((str) => new window.DOMParser().parseFromString(str, "text/xml"))
         .then((data) => {
-            const items = data.querySelectorAll("item");
 
-            if (items.length === 0) {
-                document.querySelector(".movies").innerHTML = "<span class=\"error\">user not found</span>";
-            }
+            const items = data.querySelectorAll("item");
+            console.log(items);
 
             items.forEach((item) => {
-                let title = item.querySelector("title").innerHTML;
-                if (title.includes("(contains spoilers)")) {
-                    title = title.substring(0, title.indexOf("(contains spoilers)") - 1);
-                }
-            
-                movieTitle = title.split(" - ")[0].substring(0, title.split(" - ")[0].length - 6)
-                movieYear = title.split(" - ")[0].substring(title.split(" - ")[0].length - 4, title.split(" - ")[0].length)
-                movieRating = title.split(" - ")[1]
+                let userReview = item.querySelector("description").innerHTML.split("<p>")[2].substring(0, item.querySelector("description").innerHTML.split("<p>")[2].indexOf("</p>"));
+                if (userReview.includes("Watched on")) {
+                    userReview = "";
+                } else if (userReview.includes("This review may contain spoilers.")) {
+                    userReview = item.querySelector("description").innerHTML.split("<p>")[3].substring(0, item.querySelector("description").innerHTML.split("<p>")[3].indexOf("</p>"));
+                };
 
-                let movieImage = item.querySelector("description").innerHTML;
-                movieImage = movieImage.substring(movieImage.indexOf("src=\"") + 5, movieImage.indexOf("\"/>"));
-
-                let movieReview = item.querySelector("description").innerHTML;
-                movieReview = movieReview.split("<p>")[2];
-                movieReview = movieReview.substring(0, movieReview.indexOf("</p>"));
-            
-                // if no review was left, letterboxd leaves a "Watched on" message, which I don't want to display
-                if (movieReview.includes("Watched on") || movieReview.includes("This review may contain spoilers.")) {
-                    movieReview = "";
+                let tmdbID;
+                let type;
+                try {
+                    tmdbID = item.querySelector("movieId").innerHTML;
+                    type = "movie";
+                } catch (error) {
+                    tmdbID = item.querySelector("tvId").innerHTML;
+                    type = "tv";
                 }
 
-                // movie div creation and appending
-                let movieDiv = document.createElement("div");
-                movieDiv.classList.add("movie");
-                // movieDiv.style.backgroundImage = "url(" + movieImage + ")";
-                movieDiv.innerHTML = 
-                        "<div class=\"movie-image\"><img src=\"" + movieImage + "\"></div>" +
-                        "<div class=\"movie-info\">" +
-                            "<div class=\"movie-title\">" + movieTitle + "</div>" +
-                            "<div class=\"movie-year\">" + movieYear + "</div><br>" +
-                            "<div class=\"movie-rating\">" + movieRating + "</div>" +
-                            "<div class=\"movie-review\">" + movieReview + "</div>" +
-                        "</div>";
 
-                document.querySelector(".movies").appendChild(movieDiv);
+                // turn the movie into an object
+                const movie = {
+                    // movie information
+                    title: item.querySelector("filmTitle").innerHTML,
+                    year:item.querySelector("filmYear").innerHTML,
+                    image: item.querySelector("description").innerHTML.substring(item.querySelector("description").innerHTML.indexOf("src=\"") + 5, item.querySelector("description").innerHTML.indexOf("\"/>")),
+                    tmdbID: tmdbID,
+                    type: type,
+                    // user information
+                    user: item.querySelector("creator").innerHTML,
+                    userRating: item.querySelector("memberRating").innerHTML,
+                    userRatingStars: item.querySelector("title").innerHTML.split(" - ")[1],
+                    userReview: userReview,
+                    userReviewDate: item.querySelector("pubDate").innerHTML,
+                    userReviewLink: item.querySelector("link").innerHTML,
+                    userWatchedDate: item.querySelector("watchedDate").innerHTML,
+                    userRewatch: item.querySelector("rewatch").innerHTML,
+                };
+                movies.push(movie);
             });
+
+            const randomness = Math.floor(Math.random() * movies.length);
+            const randomMovie = movies[randomness];
+            const randomMovieOld = items[randomness];
+            
+
+            results.innerHTML += "<span>result from letterboxd rss:</span>";
+
+            // console.log(items[Math.floor(Math.random() * movies.length)]);
+            const oldResultDiv = document.createElement("code");
+            oldResultDiv.classList.add("code");
+            oldResultDiv.textContent = randomMovieOld.outerHTML;
+            oldResultDiv.innerHTML += "<br><br>";
+            results.appendChild(oldResultDiv);
+
+            results.innerHTML += "<span>converted to js object:</span>";
+
+            const resultDiv = document.createElement("code");
+            resultDiv.classList.add("code");
+            resultDiv.textContent =
+                "const movie = {\n" +
+                "    image: \"" + randomMovie.image + "\",\n" +
+                "    tmdbID: \"" + randomMovie.tmdbID + "\",\n" +
+                "    title: \"" + randomMovie.title + "\",\n" +
+                "    type: \"" + randomMovie.type + "\",\n" +
+                "    user: \"" + randomMovie.user + "\",\n" +
+                "    userRating: \"" + randomMovie.userRating + "\",\n" +
+                "    userRatingStars: \"" + randomMovie.userRatingStars + "\",\n" +
+                "    userReview: \"" + randomMovie.userReview + "\",\n" +
+                "    userReviewDate: \"" + randomMovie.userReviewDate + "\",\n" +
+                "    userReviewLink: \"" + randomMovie.userReviewLink + "\",\n" +
+                "    userRewatch: \"" + randomMovie.userRewatch + "\",\n" +
+                "    userWatchedDate: \"" + randomMovie.userWatchedDate + "\",\n" +
+                "    year: \"" + randomMovie.year + "\",\n" +
+                "};\n\n";
+            results.appendChild(resultDiv);
         })
+
+
 }
 
 letterboxd();

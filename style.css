@@ -1,65 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
+
 body {
-    margin: 0;
-
-    background-color: #0f0f0f;
-
     font-family: "Lato", sans-serif;
+    background-color: #0f0f0f;
     color: #ffffff;
 }
 
-.username-container {
-    display: flex;
-    justify-content: center;
-}
-
-#username {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 10px 0;
-    margin-top: 20px;
-}
-
-.error {
-    text-align: center;
-    width: 100%;
-    
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.movies {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.movie {
-    display: flex;
-    
-    width: 500px;
-    height: 375px;
-    margin: 16px;
-
-    background-color: #1c1c1c;
-    border-radius: 3px;
-}
-
-.movie-image {
-    width: 50%;
-    
-}
-
-.movie img {
-    width: 100%;
-}
-
-.movie-info {
-    margin: 8px;
-    width: calc(50% - 16px);
-    height: calc(375px - 16px);
-
-    font-size: 24px;
-    font-weight: 700;
+.code {
+    max-width: calc(100vw - 16px);
+    display: block;
+    white-space: pre-wrap;
 }
