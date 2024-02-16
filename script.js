@@ -3,7 +3,7 @@ const input = document.getElementById("username");
 input.value = "flungi";
 let username = input.value;
 
-input.addEventListener("keypress", function(event) {
+input.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
         letterboxd();
     }
@@ -27,56 +27,60 @@ function letterboxd() {
             console.log(items);
 
             items.forEach((item) => {
-                let userReview = item.querySelector("description").innerHTML.split("<p>")[2].substring(0, item.querySelector("description").innerHTML.split("<p>")[2].indexOf("</p>"));
-                if (userReview.includes("Watched on")) {
-                    userReview = "";
-                } else if (userReview.includes("This review may contain spoilers.")) {
-                    userReview = item.querySelector("description").innerHTML.split("<p>")[3].substring(0, item.querySelector("description").innerHTML.split("<p>")[3].indexOf("</p>"));
-                };
+                console.log(item);
+                if (item.innerHTML.includes("letterboxd-list-")) {
+                    return;
+                } else {
+                    let userReview = item.querySelector("description").innerHTML.split("<p>")[2].substring(0, item.querySelector("description").innerHTML.split("<p>")[2].indexOf("</p>"));
+                    if (userReview.includes("Watched on")) {
+                        userReview = "";
+                    } else if (userReview.includes("This review may contain spoilers.")) {
+                        userReview = item.querySelector("description").innerHTML.split("<p>")[3].substring(0, item.querySelector("description").innerHTML.split("<p>")[3].indexOf("</p>"));
+                    };
 
-                let tmdbID;
-                let type;
-                try {
-                    tmdbID = item.querySelector("movieId").innerHTML;
-                    type = "movie";
-                } catch (error) {
-                    tmdbID = item.querySelector("tvId").innerHTML;
-                    type = "tv";
+                    let tmdbID;
+                    let type;
+                    try {
+                        tmdbID = item.querySelector("movieId").innerHTML;
+                        type = "movie";
+                    } catch (error) {
+                        tmdbID = item.querySelector("tvId").innerHTML;
+                        type = "tv";
+                    }
+
+
+                    // turn the movie into an object
+                    const movie = {
+                        // movie information
+                        title: item.querySelector("filmTitle").innerHTML,
+                        year: item.querySelector("filmYear").innerHTML,
+                        image: item.querySelector("description").innerHTML.substring(item.querySelector("description").innerHTML.indexOf("src=\"") + 5, item.querySelector("description").innerHTML.indexOf("\"/>")),
+                        tmdbID: tmdbID,
+                        type: type,
+                        // user information
+                        user: item.querySelector("creator").innerHTML,
+                        userRating: item.querySelector("memberRating").innerHTML,
+                        userRatingStars: item.querySelector("title").innerHTML.split(" - ")[1],
+                        userReview: userReview,
+                        userReviewDate: item.querySelector("pubDate").innerHTML,
+                        userReviewLink: item.querySelector("link").innerHTML,
+                        userWatchedDate: item.querySelector("watchedDate").innerHTML,
+                        userRewatch: item.querySelector("rewatch").innerHTML,
+                    };
+
+                    movies.push(movie);
                 }
-
-
-                // turn the movie into an object
-                const movie = {
-                    // movie information
-                    title: item.querySelector("filmTitle").innerHTML,
-                    year:item.querySelector("filmYear").innerHTML,
-                    image: item.querySelector("description").innerHTML.substring(item.querySelector("description").innerHTML.indexOf("src=\"") + 5, item.querySelector("description").innerHTML.indexOf("\"/>")),
-                    tmdbID: tmdbID,
-                    type: type,
-                    // user information
-                    user: item.querySelector("creator").innerHTML,
-                    userRating: item.querySelector("memberRating").innerHTML,
-                    userRatingStars: item.querySelector("title").innerHTML.split(" - ")[1],
-                    userReview: userReview,
-                    userReviewDate: item.querySelector("pubDate").innerHTML,
-                    userReviewLink: item.querySelector("link").innerHTML,
-                    userWatchedDate: item.querySelector("watchedDate").innerHTML,
-                    userRewatch: item.querySelector("rewatch").innerHTML,
-                };
-                movies.push(movie);
             });
 
             const randomness = Math.floor(Math.random() * movies.length);
             const randomMovie = movies[randomness];
-            const randomMovieOld = items[randomness];
-            
 
             results.innerHTML += "<span>random movie from " + username + "'s letterboxd rss:</span>";
 
             // console.log(items[Math.floor(Math.random() * movies.length)]);
             const oldResultDiv = document.createElement("code");
             oldResultDiv.classList.add("code");
-            oldResultDiv.textContent = randomMovieOld.outerHTML;
+            oldResultDiv.textContent = items[randomness].outerHTML;
             oldResultDiv.innerHTML += "<br><br>";
             results.appendChild(oldResultDiv);
 
@@ -101,9 +105,7 @@ function letterboxd() {
                 "    year: \"" + randomMovie.year + "\",\n" +
                 "};\n\n";
             results.appendChild(resultDiv);
-        })
-
-
-}
+        });
+};
 
 letterboxd();
